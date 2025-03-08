@@ -5,7 +5,7 @@ use rppal::gpio::{OutputPin, InputPin};
 
 use crate::gpio::{reader, relay, reset_button};
 use crate::actions::{add_time, reset_all};
-use crate::{TIMER, STATE, LOGIC_INPUT_PINS};
+use crate::{TIMER, STATE, LANES};
 
 fn sleep(ms: u64) {
     thread::sleep(Duration::from_millis(ms));
@@ -23,7 +23,8 @@ pub fn control_output(lane: usize) {
                         relay_guard[lane].set_high();
                     }
                 }
-            } else {
+            }
+            else {
                 sleep(1000);
             }
         }
@@ -32,11 +33,10 @@ pub fn control_output(lane: usize) {
 
 pub fn monitor_readers() {
     loop {
-        for lane in LOGIC_INPUT_PINS.iter() {
-            let lane_usize = *lane as usize;
+        for lane in LANES {
             let reader_guard: MutexGuard<[InputPin; 4]> = reader.lock().unwrap();
-            if reader_guard[lane_usize].is_low() {
-                add_time(lane_usize);
+            if reader_guard[lane].is_low() {
+                add_time(lane);
                 sleep(500);
             }
         }

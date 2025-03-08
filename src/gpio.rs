@@ -3,7 +3,10 @@ use rppal::gpio::{Gpio, OutputPin, InputPin};
 use lazy_static::lazy_static;
 use std::sync::Mutex;
 
-use crate::{RESET_BUTTON_PIN, LOGIC_OUTPUT_PINS, LOGIC_INPUT_PINS};
+//if more lanes are added in here, remember to also change the LANES definition in main.rs and obviously to increase array size
+const LOGIC_OUTPUT_PINS: [u8; 4] = [5, 6, 13, 16]; //, 19, 20, 21, 26];
+const LOGIC_INPUT_PINS: [u8; 4] = [2, 3, 4, 17]; //, 27, 22, 10, 9];
+const RESET_BUTTON_PIN: u8 = 18;
 
 fn initialize_gpio() -> Result<([OutputPin; 4], [InputPin; 4], InputPin), Box<dyn Error>> {
     let local_relay = [
