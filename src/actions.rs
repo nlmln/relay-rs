@@ -1,7 +1,8 @@
-use crate::{TIMER, TIMER_DURATION, STATE, LOGIC_OUTPUT_PINS};
-use crate::gpio::relay;
 use rppal::gpio::OutputPin;
 use std::sync::MutexGuard;
+
+use crate::{TIMER, TIMER_DURATION, STATE, LANES};
+use crate::gpio::relay;
 
 pub fn add_time(lane: usize) {
     unsafe {
@@ -21,13 +22,12 @@ pub fn subtract_time(lane: usize) {
 }
 
 pub fn reset_all() {
-    for lane in LOGIC_OUTPUT_PINS.iter() {
-        let lane_usize = *lane as usize;
+    for lane in LANES {
         unsafe {
-            TIMER[lane_usize] = 0;
-            STATE[lane_usize] = false;
+            TIMER[lane] = 0;
+            STATE[lane] = false;
             let mut relay_guard: MutexGuard<[OutputPin; 4]> = relay.lock().unwrap();
-            relay_guard[lane_usize].set_high();
+            relay_guard[lane].set_high();
         }
     }
 }
