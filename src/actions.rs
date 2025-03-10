@@ -21,6 +21,15 @@ pub fn subtract_time(lane: usize) {
     }
 }
 
+pub fn reset_lane(lane: usize) {
+    unsafe {
+        TIMER[lane] = 0;
+        STATE[lane] = false;
+        let mut relay_guard: MutexGuard<[OutputPin; 4]> = relay.lock().unwrap();
+        relay_guard[lane].set_high();
+    }
+}
+
 pub fn reset_all() {
     for lane in LANES {
         unsafe {
@@ -30,4 +39,24 @@ pub fn reset_all() {
             relay_guard[lane].set_high();
         }
     }
+}
+
+pub fn status() -> String {
+    let mut status = String::new();
+    unsafe {
+        for lane in LANES {
+            let time = seconds_to_hhmmss(TIMER[lane]);
+            status = format!("{}{}: {},", status, lane, time);
+        }
+        
+    }
+    format!("Status: {}", status)
+}
+
+fn seconds_to_hhmmss(seconds: u64) -> String {
+    let hours = seconds / 3600;
+    let minutes = (seconds % 3600) / 60;
+    let seconds = seconds % 60;
+
+    format!("{:02}:{:02}:{:02}", hours, minutes, seconds)
 }
