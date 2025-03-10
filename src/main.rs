@@ -3,15 +3,17 @@ use std::thread;
 
 use crate::daemons::{control_output, monitor_readers};
 use crate::gpio::relay;
+use crate::websocket::websocket_server;
 
 mod actions;
 mod daemons;
 mod gpio;
+mod websocket;
 
 pub const LANES: [usize; 4] = [1, 2, 3, 4]; //, 5, 6, 7, 8];
-pub const TIMER_DURATION: u32 = 900;
+pub const TIMER_DURATION: u64 = 900;
 
-pub static mut TIMER: [u32; 4] = [0, 0, 0, 0];
+pub static mut TIMER: [u64; 4] = [0, 0, 0, 0];
 pub static mut STATE: [bool; 4] = [false, false, false, false];
 
 fn hw_init() {
@@ -27,6 +29,7 @@ fn start_threads() {
     }
 
     thread::spawn(|| { monitor_readers(); });
+    thread::spawn(|| { websocket_server(); });
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
