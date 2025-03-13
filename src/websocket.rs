@@ -14,22 +14,22 @@ fn handle_connection(stream: TcpStream) {
             Message::Text(text) => {
                 let response_message = String::new();
 
-                if text.starts_with("/add_time") {
-                    let response_message = text.trim_start_matches("/add_time").trim();
+                if text.starts_with("/add_time/") {
+                    let response_message = text.trim_start_matches("/add_time/").trim();
                     let lane = response_message.parse().expect("Not a valid number");
                     add_time(lane);
                     let response = success_json();
                     ws_stream.send(Message::Text(response.into())).expect("Error sending message");
 
-                } else if text.starts_with("/subtract_time") {
-                    let response_message = text.trim_start_matches("/subtract_time").trim();
+                } else if text.starts_with("/subtract_time/") {
+                    let response_message = text.trim_start_matches("/subtract_time/").trim();
                     let lane = response_message.parse().expect("Not a valid number");
                     subtract_time(lane);
                     let response = success_json();
                     ws_stream.send(Message::Text(response.into())).expect("Error sending message");
 
-                } else if text.starts_with("/reset_lane") {
-                    let response_message = text.trim_start_matches("/reset_lane").trim();
+                } else if text.starts_with("/reset_lane/") {
+                    let response_message = text.trim_start_matches("/reset_lane/").trim();
                     let lane = response_message.parse().expect("Not a valid number");
                     reset_lane(lane);
                     let response = success_json();
