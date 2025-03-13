@@ -1,5 +1,6 @@
 use rppal::gpio::OutputPin;
 use std::sync::MutexGuard;
+use json::{object};
 
 use crate::{TIMER, TIMER_DURATION, STATE, LANES};
 use crate::gpio::relay;
@@ -41,6 +42,7 @@ pub fn reset_all() {
     }
 }
 
+//this function is technically unused I think
 pub fn status() -> String {
     let mut status = String::new();
     unsafe {
@@ -51,6 +53,37 @@ pub fn status() -> String {
         
     }
     format!("Status: {}", status)
+}
+
+pub fn status_json() -> String {
+    let mut status = String::new();
+    unsafe {
+        let mut instantiated = object! {
+            timers: json::array![],
+            active: json::array![]
+        };
+
+        for lane in LANES {
+            let time = seconds_to_hhmmss(TIMER[lane]);
+            let active = STATE[lane];
+            instantiated["timers"][lane] = time.into();
+            instantiated["active"][lane] = active.into();
+        }
+
+        status = format!("{}", instantiated.dump());
+        
+    }
+
+    format!("{}", status)
+    
+}
+
+pub fn success_json() -> String {
+    let response = object! {
+        success: true
+    };
+
+    format!("{}", response)
 }
 
 fn seconds_to_hhmmss(seconds: u64) -> String {
