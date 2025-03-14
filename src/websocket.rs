@@ -1,4 +1,4 @@
-use std::net::{TcpListener, TcpStream};
+use std::net::{TcpListener, TcpStream, IpAddr};
 use tungstenite::accept;
 use tungstenite::protocol::Message;
 
@@ -53,17 +53,29 @@ fn handle_connection(stream: TcpStream) {
     }
 }
 
+fn is_localhost(ip: &IpAddr) -> bool {
+    match ip {
+        IpAddr::V4(addr) => addr.is_loopback(),
+        IpAddr::V6(addr) => addr.is_loopback(),
+    }
+}
+
 pub fn websocket_server() {
     let addr = "127.0.0.1:8080";
     let listener = TcpListener::bind(addr).expect("Failed to bind");
 
     println!("WebSocket server listening on {}", addr);
-
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
-                println!("New connection: {:?}", stream.peer_addr());
-                handle_connection(stream);
+                let peer_addr = stream.peer_addr().expect("Could not get peer address");
+                println!("New connection: {:?}", peer_addr);
+                if is_localhost(&peer_addr.ip()) {
+                    handle_connection(stream);
+                }
+                else {
+                    println!("Connection attempt from non-localhost: {}", peer_addr);
+                }
             }
             Err(e) => {
                 eprintln!("Error accepting connection: {}", e);

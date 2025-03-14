@@ -6,9 +6,7 @@
 
 # TODO  
 - actualluy test the damn thing on real hardware (this is waiting on parts to arrive, I have a spare sd but no spare pi or relay board)  
-- implement PoC webui with the bare minimum html, js and css basing off of the python implementation to be used internally  
 - create a deployment playbook in ansible  
 - try to avoid memory unsafe operations  
 - improve code readability  
-- implement a authentication system to prevent anyone who has access to the network from being able to run privileged commands such as editing time or resetting lanes  
 - add docs to github wiki  
