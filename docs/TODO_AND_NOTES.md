@@ -5,6 +5,8 @@
 - there's still plenty of memory unsafe operations due to multithreading  
 
 # TODO  
-- add a API (like RESTful or WebSocket) to allow our webui to communicate  
+- actualluy test the damn thing on real hardware (this is waiting on parts to arrive, I have a spare sd but no spare pi or relay board)  
+- create a deployment playbook in ansible  
 - try to avoid memory unsafe operations  
 - improve code readability  
+- add docs to github wiki  

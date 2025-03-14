@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bowling lane Controls</title>
+    <script>
+        let socket;
+        let currentSize = 0;
+
+        function initWebSocket() {
+            socket = new WebSocket('ws://localhost:8080');
+
+            socket.onopen = function() {
+                console.log('WebSocket connection established');
+                updateStatus();
+                setInterval(updateStatus, 1000);
+            };
+
+            socket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                if (data.success === "true") {
+                    updateStatus();
+                } else if (data.timers && data.active) {
+                    if(data.timers.length != currentSize) {
+                        reinitializeTable(data);
+                        currentSize = data.timers.length;
+                    }
+                    handleStatusUpdate(data);
+                }
+            };
+
+            socket.onclose = function() {
+                console.log('WebSocket connection closed');
+            };
+
+            socket.onerror = function(error) {
+                console.error('WebSocket error:', error);
+            };
+        }
+
+        function reinitializeTable(data) {
+            let length = data.timers.length;
+            let table = document.getElementById("bowling-lanes-table");
+            table.innerHTML = `<tr>
+            <th width="100px">Lane</th>
+            <th width="120px">Time</th>
+            <th width="150px">Status</th>
+            <th width="150px">Actions</th>
+            </tr>`;
+
+
+            for (let i = 0; i < length; i++) {
+                let laneRow = table.insertRow(-1);
+
+                let indexCell = laneRow.insertCell(-1);
+                indexCell.innerText = i+1;
+
+                let timerCell = laneRow.insertCell(-1);
+                timerCell.id = "timer-" + i;
+
+                let statusCell = laneRow.insertCell(-1);
+                statusCell.id = "status-" + i;
+
+                let buttonCell = laneRow.insertCell(-1);
+                let buttons = [
+                    ["+", function() {addTime(i);}],
+                    ["-", function() {subtractTime(i);}],
+                    ["Reset", function() {resetLane(i);}]
+                ];
+                for (const [buttonText, buttonOnClick] of buttons) {
+                    let button = document.createElement('button');
+                    button.textContent = buttonText;
+                    button.onclick = buttonOnClick;
+                    buttonCell.appendChild(button);
+                }
+            }
+        }
+
+        function handleStatusUpdate(data) {
+            if (data.timers && data.active) {
+                for (const pin in data.timers) {
+                    document.getElementById('timer-' + pin).innerText = data.timers[pin]; // Already formatted
+                    document.getElementById('status-' + pin).innerText = data.active[pin] ? 'Active' : 'Inactive';
+                }
+            }
+        }
+
+        function addTime(pin) {
+            socket.send(`/add_time/${pin}`);
+        }
+
+        function subtractTime(pin) {
+            socket.send(`/subtract_time/${pin}`);
+        }
+
+        function resetLane(pin) {
+            socket.send(`/reset_lane/${pin}`);
+        }
+
+        function resetAll() {
+            socket.send('/reset_all/');
+        }
+
+        function updateStatus() {
+            socket.send('/status');
+        }
+
+        window.onload = function() {
+            initWebSocket();
+        };
+
+   </script>
+   </head>
+<body>
+<font size=4>
+    <style>
+            html, body, table, h1{
+    text-align: center;
+}
+</style>
+    <table align="center" border="2px" id="bowling-lanes-table">
+        <tr>
+            <th width="100px">Lane</th>
+            <th width="120px">Time</th>
+            <th width="150px">Status</th>
+            <th width="150px">Actions</th>
+        </tr>
+    </font>
+    </table>
+    <button onclick="resetAll()">Reset All lanes</button>
+</body>
+</html>
